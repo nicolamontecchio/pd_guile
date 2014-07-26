@@ -1,15 +1,15 @@
 /* guile -- use GNU Guile to script stuff inside Pd. */
-
-
 #include "m_pd.h"
 #include <math.h>
-static t_class *guile_class;
+#include <libguile.h>
 
+static t_class *guile_class;
 
 typedef struct _guile
 {
   t_object x_obj;
   // other members here
+
 } t_guile;
 
 static void *guile_new(t_float fnonrepeat)
@@ -19,15 +19,9 @@ static void *guile_new(t_float fnonrepeat)
   return (x);
 }
 
-static void guile_clear(t_guile *x)
-{
-  // ?
-}
-
-
 static void guile_free(t_guile *x)
 {
-  /* freebytes(x->x_vec, x->x_n * sizeof(t_elem)); */
+  // destructor
 }
 
 void guile_setup(void)
