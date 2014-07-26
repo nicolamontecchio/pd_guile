@@ -9,8 +9,7 @@ typedef struct _guile
 {
   t_object x_obj;
   // other members here
-
-  SCM func;
+  /* SCM func; */
 
 } t_guile;
 
@@ -19,8 +18,8 @@ static void *guile_new(t_float fnonrepeat)
   t_guile *x = (t_guile *)pd_new(guile_class);
   outlet_new(&x->x_obj, gensym("float"));
   scm_init_guile();
-  scm_c_primitive_load( "/Users/echonest/repos/pd_guile/script.scm" );
-  x->func = scm_variable_ref( scm_c_lookup( "print-hello" ) );
+  /* scm_c_primitive_load( "/Users/echonest/repos/pd_guile/script.scm" ); */
+  /* x->func = scm_variable_ref( scm_c_lookup( "print-hello" ) ); */
   return (x);
 }
 
@@ -33,7 +32,7 @@ static void guile_free(t_guile *x)
 static void guile_sayhi(t_guile *x)
 {
   post("hi from pd");
-  scm_call_0(x->func);
+  /* scm_call_0(x->func); */
 }
 
 
