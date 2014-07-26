@@ -29,6 +29,14 @@ static void guile_free(t_guile *x)
   // destructor
 }
 
+
+static void guile_sayhi(t_guile *x)
+{
+  post("hi from pd");
+  scm_call_0(x->func);
+}
+
+
 void guile_setup(void)
 {
 
@@ -41,4 +49,6 @@ void guile_setup(void)
 
   /* class_addmethod(guile_class, (t_method)guile_add, gensym("add"), A_GIMME, 0); */
   /* class_addlist(guile_class, guile_list); */
+  class_addmethod(guile_class, (t_method)guile_sayhi, gensym("sayhi"), 0);
+
 }
