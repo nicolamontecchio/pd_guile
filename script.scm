@@ -1,3 +1,3 @@
 (define print-hello
-  (lambda ()
-    (display "script called") (newline)))
+  (lambda (a b)
+    (+ a b)))

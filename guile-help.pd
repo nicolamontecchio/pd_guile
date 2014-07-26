@@ -1,4 +1,6 @@
 #N canvas 525 460 450 300 10;
-#X msg 160 76 sayhi;
-#X obj 160 111 guile script.scm;
+#X msg 130 143 sayhi;
+#X obj 130 178 guile script.scm;
+#X msg 156 85 print-hello 3 4;
 #X connect 0 0 1 0;
+#X connect 2 0 1 0;

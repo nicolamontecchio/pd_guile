@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
   scm_init_guile();
   scm_c_primitive_load("script.scm");
-  char *func_name = "print-hello2";
+  char *func_name = "print-hello";
   SCM func = scm_variable_ref(scm_c_lookup(func_name));
 
   SCM *args = malloc(sizeof(SCM) * 2);
