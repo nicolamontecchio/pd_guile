@@ -1,0 +1,4 @@
+#N canvas 525 460 450 300 10;
+#X obj 161 111 guile;
+#X msg 164 74 sayhi;
+#X connect 1 0 0 0;
