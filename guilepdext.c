@@ -1,6 +1,6 @@
 /* guile -- use GNU Guile to script stuff inside Pd. */
+#include <stdio.h>
 #include "m_pd.h"
-#include <math.h>
 #include <libguile.h>
 
 static t_class *guile_class;
@@ -9,17 +9,32 @@ typedef struct _guile
 {
   t_object x_obj;
   // other members here
-  /* SCM func; */
 
 } t_guile;
 
-static void *guile_new(t_float fnonrepeat)
+static void *guile_new(t_symbol *s, int argc, t_atom *argv)
 {
+
+  if(argc != 1)
+  {
+    post("[guile] must be instantiated with exactly one argument (the script file name)");
+    return NULL;
+  }
+
   t_guile *x = (t_guile *)pd_new(guile_class);
   outlet_new(&x->x_obj, gensym("float"));
   scm_init_guile();
-  /* scm_c_primitive_load( "/Users/echonest/repos/pd_guile/script.scm" ); */
-  /* x->func = scm_variable_ref( scm_c_lookup( "print-hello" ) ); */
+  char *path_dir = canvas_getcurrentdir()->s_name;
+  char *script_filename = atom_getsymbol(argv + 0)->s_name;
+  char script_fullpath[2048];
+  sprintf(script_fullpath, "%s/%s", path_dir, script_filename);
+  post("[guile]: loading scheme source from %s", script_fullpath);
+  if(access(script_fullpath, F_OK) == -1)
+  {
+    post("[guile]: scheme source file does not exist :(");
+    return NULL;
+  }
+
   return (x);
 }
 
@@ -40,7 +55,7 @@ void guile_setup(void)
 {
 
   guile_class = class_new(gensym("guile"), (t_newmethod)guile_new,
-			  (t_method)guile_free, sizeof(t_guile), 0, A_DEFFLOAT, 0);
+			  (t_method)guile_free, sizeof(t_guile), 0, A_GIMME, 0);
 
 
   /* scm_call_0( func ); */
