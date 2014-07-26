@@ -39,14 +39,19 @@ static void *guile_new(t_symbol *s, int argc, t_atom *argv)
 static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 {
   char *func_name = s->s_name;
-  // TODO scm_c_lookup crashes PD if func_name is incorrect; it shouldn't, but it does :(
+  // TODO scm_c_lookup crashes PD if func_name is incorrect; find out how to wrap exceptions
   SCM func = scm_variable_ref(scm_c_lookup(func_name));
+
   SCM * args = malloc(sizeof(SCM) * argc);
   int all_good = 1;
   for(int i = 0; i < argc; i++)
   {
     if(argv[i].a_type == A_FLOAT)
-      args[i] = scm_from_double((double)atom_getfloat(argv + i));
+    {
+      double d = (double)atom_getfloat(argv + i);
+      printf("%f\n", d);
+      args[i] = scm_from_double(d);
+    }
     else if (argv[i].a_type == A_SYMBOL)
     {
       char *s = atom_getsymbol(argv + i)->s_name;
@@ -57,13 +62,14 @@ static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       post("[guile]: error - data type not supported for list item %d", i);
       all_good = 0;
     }
-    if(all_good)
-    {
-      post("argc: %d", argc);
-      /* SCM ret_val = scm_call_n(func, args, argc); */
-
-    }
   }
+  if(all_good)
+  {
+    SCM ret_val = scm_call_n(func, args, argc);
+
+
+  }
+
   free(args);
 }
 
