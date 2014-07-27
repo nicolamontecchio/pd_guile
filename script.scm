@@ -2,9 +2,9 @@
   (lambda (a b)
     (string-concatenate
      (list
-      "the sum of "
+      "the product of "
       (number->string a)
       " and "
       (number->string b)
       " is "
-      (number->string (+ a b))))))
+      (number->string (* a b))))))

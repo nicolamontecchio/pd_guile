@@ -4,7 +4,9 @@
 #X floatatom 138 248 5 0 0 0 - - -, f 5;
 #X msg 156 85 print-hello 16 22;
 #X obj 200 249 print;
+#X msg 277 139 symbol guile-reload;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 0 4 0;
 #X connect 3 0 1 0;
+#X connect 5 0 1 0;
