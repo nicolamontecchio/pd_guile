@@ -1,5 +1,6 @@
 /* guile -- use GNU Guile to script stuff inside Pd. */
 #include <stdio.h>
+#include <string.h>
 #include "m_pd.h"
 #include <libguile.h>
 
@@ -8,8 +9,7 @@ static t_class *guile_class;
 typedef struct _guile
 {
   t_object x_obj;
-  // other members here
-
+  char guile_src_fullpath[2048];
 } t_guile;
 
 static void *guile_new(t_symbol *s, int argc, t_atom *argv)
@@ -24,16 +24,27 @@ static void *guile_new(t_symbol *s, int argc, t_atom *argv)
   scm_init_guile();
   char *path_dir = canvas_getcurrentdir()->s_name;
   char *guile_src_filename = atom_getsymbol(argv + 0)->s_name;
-  char guile_src_fullpath[2048];
-  sprintf(guile_src_fullpath, "%s/%s", path_dir, guile_src_filename);
-  post("[guile]: loading scheme source from %s", guile_src_fullpath);
-  if(access(guile_src_fullpath, F_OK) == -1)
+  sprintf(x->guile_src_fullpath, "%s/%s", path_dir, guile_src_filename);
+  post("[guile]: loading scheme source from %s", x->guile_src_fullpath);
+  if(access(x->guile_src_fullpath, F_OK) == -1)
   {
     post("[guile]: scheme source file does not exist :(");
     return NULL;
   }
-  scm_c_primitive_load(guile_src_fullpath);
+  scm_c_primitive_load(x->guile_src_fullpath);
   return (x);
+}
+
+
+static void guile_symbol(t_guile *x, t_symbol *s)
+{
+  /* special case for reloading script */
+  char *ss = s->s_name;
+  if(strcmp(ss, "guile-reload") == 0)
+  {
+    // TODO code to reload the scheme source
+  }
+
 }
 
 static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
@@ -100,4 +111,5 @@ void guile_setup(void)
   guile_class = class_new(gensym("guile"), (t_newmethod)guile_new,
 			  (t_method)guile_free, sizeof(t_guile), 0, A_GIMME, 0);
   class_addanything(guile_class, (t_method)guile_list);
+  class_addsymbol(guile_class, (t_method)guile_symbol);
 }
