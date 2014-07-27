@@ -1,8 +1,10 @@
-#N canvas 525 460 450 300 10;
+#N canvas 719 464 450 300 10;
 #X msg 130 143 sayhi;
 #X obj 130 178 guile script.scm;
-#X msg 156 85 print-hello 3 8;
 #X floatatom 138 248 5 0 0 0 - - -, f 5;
+#X msg 156 85 print-hello 16 22;
+#X obj 200 249 print;
 #X connect 0 0 1 0;
-#X connect 1 0 3 0;
-#X connect 2 0 1 0;
+#X connect 1 0 2 0;
+#X connect 1 0 4 0;
+#X connect 3 0 1 0;

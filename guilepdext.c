@@ -71,7 +71,13 @@ static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       double v = scm_to_double(ret_val);
       outlet_float(x->x_obj.ob_outlet, (t_float)v);
     }
+    else if(scm_is_string(ret_val))
+    {
+      char *s = scm_to_locale_string(ret_val);
+      outlet_symbol(x->x_obj.ob_outlet, gensym(s));
+    }
     // TODO finish with string and list return type
+
   }
 
   free(args);
@@ -80,6 +86,11 @@ static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 static void guile_free(t_guile *x)
 {
   // TODO destructor
+
+  /* x->x_obj
+   */
+
+
 }
 
 
