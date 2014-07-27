@@ -66,8 +66,12 @@ static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
   if(all_good)
   {
     SCM ret_val = scm_call_n(func, args, argc);
-
-
+    if(scm_is_number(ret_val))
+    {
+      double v = scm_to_double(ret_val);
+      outlet_float(x->x_obj.ob_outlet, v);
+    }
+    // TODO finish with string and list return type
   }
 
   free(args);
@@ -75,7 +79,7 @@ static void guile_list(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 
 static void guile_free(t_guile *x)
 {
-  // destructor
+  // TODO destructor
 }
 
 
