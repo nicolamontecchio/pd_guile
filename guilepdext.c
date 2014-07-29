@@ -80,7 +80,11 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 	char *s = scm_to_locale_string(ret_val);
 	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
       }
-      // TODO finish with string and list return type
+      else if(scm_is_pair(ret_val))
+      {
+	printf("return value was PAIR\n");
+	// TODO this is for the list return type ...
+      }
 
     }
     free(args);
