@@ -40,6 +40,11 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 {
   if(strcmp(s->s_name, "guile-reload") == 0)
     scm_c_primitive_load(x->guile_src_fullpath);
+  else if(strcmp(s->s_name, "float") == 0)
+  {
+    printf("input was a float!\n");
+    // TODO complete here
+  }
   else
   {
     char *func_name = s->s_name;
@@ -80,12 +85,29 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 	char *s = scm_to_locale_string(ret_val);
 	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
       }
-      else if(scm_is_pair(ret_val))
+      else if(scm_list_p(ret_val))
       {
-	printf("return value was PAIR\n");
-	// TODO this is for the list return type ...
+	int l = scm_to_int(scm_length(ret_val));
+	t_atom *out_atoms = malloc(l * sizeof(t_atom));
+	for(int i = 0; i < l; i++)
+	{
+	  SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
+	  if(scm_is_number(item_i))
+	  {
+	    double v = scm_to_double(item_i);
+	    out_atoms[i].a_type = A_FLOAT;
+	    out_atoms[i].a_w.w_float = v;
+	  }
+	  else if(scm_is_string(item_i))
+	  {
+	    char *s = scm_to_locale_string(item_i);
+	    out_atoms[i].a_type = A_SYMBOL;
+	    out_atoms[i].a_w.w_symbol = gensym(s);
+	  }
+	}
+	outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
+	free(out_atoms);
       }
-
     }
     free(args);
   }
