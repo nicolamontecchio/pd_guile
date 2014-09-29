@@ -1,4 +1,4 @@
-(define print-hello
+(define print-hell
   (lambda (a b)
     ;; (string-concatenate
     ;;  (list

@@ -48,7 +48,13 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
   else
   {
     char *func_name = s->s_name;
-    // TODO scm_c_lookup crashes PD if func_name is incorrect; find out how to wrap exceptions
+    SCM cm = scm_current_module();
+    SCM f = scm_module_variable(cm, scm_from_utf8_symbol(func_name));
+    if(scm_is_false(f))
+    {
+      post("can't load function %s; check your scheme source\n", func_name);
+      return;
+    }
     SCM func = scm_variable_ref(scm_c_lookup(func_name));
 
     SCM * args = malloc(sizeof(SCM) * argc);
