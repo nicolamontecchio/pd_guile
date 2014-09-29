@@ -1,4 +1,4 @@
-(define print-hell
+(define print-hello
   (lambda (a b)
     ;; (string-concatenate
     ;;  (list
@@ -8,9 +8,14 @@
     ;;   (number->string b)
     ;;   " is "
     ;;   (number->string (* a b))))
-
-    (/ (+ a b) 2)
-
+    (/ (+ a b) 2)))
 
 
-    ))
+(define flululu
+  (lambda (a b)
+    (string-concatenate
+     (list a b))))
+
+(define sayhi
+  (lambda ()
+    (* 10 20)))

@@ -1,14 +1,14 @@
 #N canvas 719 464 450 300 10;
 #X msg 71 129 sayhi;
 #X obj 130 178 guile script.scm;
-#X floatatom 138 248 5 0 0 0 - - -, f 5;
-#X msg 166 57 print-hello 16 22;
+#X floatatom 92 220 5 0 0 0 - - -, f 5;
 #X obj 200 249 print;
 #X msg 277 139 guile-reload;
 #X msg 93 89 23;
+#X msg 166 57 flululu aba bcb;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
-#X connect 1 0 4 0;
-#X connect 3 0 1 0;
+#X connect 1 0 3 0;
+#X connect 4 0 1 0;
 #X connect 5 0 1 0;
 #X connect 6 0 1 0;
