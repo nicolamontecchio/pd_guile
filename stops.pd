@@ -1,12 +1,22 @@
-#N canvas 881 349 450 300 10;
-#X floatatom 92 220 5 0 0 0 - - -, f 5;
+#N canvas 881 349 432 542 10;
 #X obj 200 249 print;
-#X obj 130 178 guile stops.scm;
+#X obj 152 173 guile stops.scm;
 #X msg 44 79 guile-reload;
 #X msg 175 122 flip-stop 1;
 #X msg 162 92 stops-status;
-#X connect 2 0 0 0;
+#X obj 105 371 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 133 371 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 159 371 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 38 267 unpack;
+#X obj 112 331 unpack 0 0 0;
+#X connect 1 0 0 0;
+#X connect 1 0 9 0;
 #X connect 2 0 1 0;
-#X connect 3 0 2 0;
-#X connect 4 0 2 0;
-#X connect 5 0 2 0;
+#X connect 3 0 1 0;
+#X connect 4 0 1 0;
+#X connect 9 0 5 0;
+#X connect 9 1 6 0;
+#X connect 9 2 7 0;
