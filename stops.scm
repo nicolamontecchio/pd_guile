@@ -3,17 +3,13 @@
 ;; stops are initialized to off
 (define stops (make-vector (length stop-names) #f))
 
+;; return a list; 1 means on, 0 off
 (define stops-status
   (lambda ()
     (map (lambda (e) (if e 1 0)) (vector->list stops))))
 
 (define flip-stop
   (lambda (stop-number)
-    (vector-set!
-     stops
-     stop-number
-     (not (vector-ref stops stop-number)))
-    ;; stops
-    ;; 3
-    ;; 4
+    (let ((i (inexact->exact stop-number)))
+      (vector-set! stops i (not (vector-ref stops i))))
     (stops-status)))
