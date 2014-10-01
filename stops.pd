@@ -1,0 +1,12 @@
+#N canvas 881 349 450 300 10;
+#X floatatom 92 220 5 0 0 0 - - -, f 5;
+#X obj 200 249 print;
+#X obj 130 178 guile stops.scm;
+#X msg 44 79 guile-reload;
+#X msg 175 122 flip-stop 1;
+#X msg 162 92 stops-status;
+#X connect 2 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 5 0 2 0;
