@@ -35,6 +35,52 @@ static void *guile_new(t_symbol *s, int argc, t_atom *argv)
   return (x);
 }
 
+struct t_guile_function
+{
+  SCM proc;
+  SCM *argv;
+  size_t nargs;
+};
+
+SCM pdguile_guile_catch (void *procedure, void *data)
+{
+  SCM value;
+  value = scm_internal_catch (SCM_BOOL_T,
+			      (scm_t_catch_body)procedure,
+			      data,
+			      (scm_t_catch_handler) scm_handle_by_message_noexit,
+			      NULL);
+  return value;
+}
+
+SCM pdguile_guile_scm_call_n (void *proc)
+{
+  struct t_guile_function *guile_function;
+  guile_function = (struct t_guile_function *)proc;
+  return scm_call_n (guile_function->proc,
+		     guile_function->argv, guile_function->nargs);
+}
+
+SCM pdguile_guile_exec_function (const char *function, SCM *argv, size_t nargs)
+{
+  SCM func, func2, value;
+  struct t_guile_function guile_function;
+  func = pdguile_guile_catch (scm_c_lookup, (void *)function);
+  func2 = pdguile_guile_catch (scm_variable_ref, func);
+  if (argv)
+  {
+    guile_function.proc = func2;
+    guile_function.argv = argv;
+    guile_function.nargs = nargs;
+    value = pdguile_guile_catch (pdguile_guile_scm_call_n, &guile_function);
+  }
+  else
+  {
+    value = pdguile_guile_catch (scm_call_0, func2);
+  }
+  return value;
+}
+
 
 static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 {
@@ -55,7 +101,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       post("[guile]: can't load function %s; check your scheme source\n", func_name);
       return;
     }
-    SCM func = scm_variable_ref(scm_c_lookup(func_name));
+    /* SCM func = scm_variable_ref(scm_c_lookup(func_name)); */
 
     SCM * args = malloc(sizeof(SCM) * argc);
     int all_good = 1;
@@ -80,7 +126,8 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     }
     if(all_good)
     {
-      SCM ret_val = scm_call_n(func, args, argc);
+      SCM ret_val = pdguile_guile_exec_function(func_name, args, argc);
+
       if(scm_is_number(ret_val))
       {
 	double v = scm_to_double(ret_val);
@@ -111,6 +158,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 	    out_atoms[i].a_w.w_symbol = gensym(s);
 	  }
 	}
+
 	outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
 	free(out_atoms);
       }
