@@ -45,11 +45,8 @@ struct t_guile_function
 SCM pdguile_guile_catch (void *procedure, void *data)
 {
   SCM value;
-  value = scm_internal_catch (SCM_BOOL_T,
-			      (scm_t_catch_body)procedure,
-			      data,
-			      (scm_t_catch_handler) scm_handle_by_message_noexit,
-			      NULL);
+  value = scm_internal_catch (SCM_BOOL_T, (scm_t_catch_body)procedure, data,
+			      (scm_t_catch_handler) scm_handle_by_message_noexit, NULL);
   return value;
 }
 
@@ -67,7 +64,7 @@ SCM pdguile_guile_exec_function (const char *function, SCM *argv, size_t nargs)
   struct t_guile_function guile_function;
   func = pdguile_guile_catch (scm_c_lookup, (void *)function);
   func2 = pdguile_guile_catch (scm_variable_ref, func);
-  if (argv)
+  if (nargs > 0)
   {
     guile_function.proc = func2;
     guile_function.argv = argv;
@@ -128,37 +125,42 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     {
       SCM ret_val = pdguile_guile_exec_function(func_name, args, argc);
 
-      if(scm_is_number(ret_val))
+      /* if(scm_is_null_or_nil(ret_val)) */
+      /* { */
+      /* 	printf("asaksjdhaksjhds\n"); */
+      /* } */
+      else if(scm_is_number(ret_val))
       {
-	double v = scm_to_double(ret_val);
-	outlet_float(x->x_obj.ob_outlet, (t_float)v);
+      	double v = scm_to_double(ret_val);
+      	outlet_float(x->x_obj.ob_outlet, (t_float)v);
       }
       else if(scm_is_string(ret_val))
       {
-	char *s = scm_to_locale_string(ret_val);
-	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
+      	char *s = scm_to_locale_string(ret_val);
+      	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
       }
       else if(scm_list_p(ret_val))
       {
-	int l = scm_to_int(scm_length(ret_val));
-	t_atom *out_atoms = malloc(l * sizeof(t_atom));
-	for(int i = 0; i < l; i++)
-	{
-	  SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
-	  if(scm_is_number(item_i))
-	  {
-	    double v = scm_to_double(item_i);
-	    out_atoms[i].a_type = A_FLOAT;
-	    out_atoms[i].a_w.w_float = v;
-	  }
-	  else if(scm_is_string(item_i))
-	  {
-	    char *s = scm_to_locale_string(item_i);
-	    out_atoms[i].a_type = A_SYMBOL;
-	    out_atoms[i].a_w.w_symbol = gensym(s);
-	  }
-	}
+      	int l = scm_to_int(scm_length(ret_val));  // TODO CRASHES HERE IF RETVAL IS RESULT OF (display ...)
+	/* printf("scm list of length %d\n", l); */
 
+      	t_atom *out_atoms = malloc(l * sizeof(t_atom));
+      	for(int i = 0; i < l; i++)
+      	{
+      	  SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
+      	  if(scm_is_number(item_i))
+      	  {
+      	    double v = scm_to_double(item_i);
+      	    out_atoms[i].a_type = A_FLOAT;
+      	    out_atoms[i].a_w.w_float = v;
+      	  }
+      	  else if(scm_is_string(item_i))
+      	  {
+      	    char *s = scm_to_locale_string(item_i);
+      	    out_atoms[i].a_type = A_SYMBOL;
+      	    out_atoms[i].a_w.w_symbol = gensym(s);
+      	  }
+      	}
 	outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
 	free(out_atoms);
       }
