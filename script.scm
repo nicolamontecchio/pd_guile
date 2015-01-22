@@ -25,11 +25,23 @@
     (display (string-append (number->string (+ a b)) "\n"))
     asdlfksjscdhf))
 
+
+
+
+
+(define any-to-string
+  (lambda (s)
+    (if (symbol? s) (symbol->string s) s)))
+
 (define catch-thiscrashes
   (lambda ()
     (catch #t
       (lambda () (thiscrashes 3 4))
       (lambda (key . parameters)
-	(display "noooo!!\n")))))
+	(display (string-append "ERROR: " (symbol->string key) "\n"))
+	;; (display (string-append
+	;; 	  (string-concatenate (map any-to-string parameters))
+	;; 	  "\n"))
+	))))
 
 (catch-thiscrashes)
