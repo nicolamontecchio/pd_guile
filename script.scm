@@ -19,3 +19,17 @@
 (define sayhi
   (lambda ()
     (* 10 20)))
+
+(define thiscrashes
+  (lambda (a b)
+    (display (string-append (number->string (+ a b)) "\n"))
+    asdlfksjscdhf))
+
+(define catch-thiscrashes
+  (lambda ()
+    (catch #t
+      (lambda () (thiscrashes 3 4))
+      (lambda (key . parameters)
+	(display "noooo!!\n")))))
+
+(catch-thiscrashes)
