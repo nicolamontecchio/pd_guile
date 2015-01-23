@@ -22,7 +22,8 @@
 
 (define thiscrashes
   (lambda (a b)
-    (display (string-append (number->string (+ a b)) "\n"))
+    ;; (display (string-append (number->string (+ a b)) "\n"))
+    (+ a b)
     ;; 3
     ;; asdlfksjscdhf
     ))

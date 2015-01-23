@@ -125,11 +125,12 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     {
       SCM ret_val = pdguile_guile_exec_function(func_name, args, argc);
 
-      /* if(scm_is_null_or_nil(ret_val)) */
+      /* if(scm_null_p(ret_val)) */
       /* { */
       /* 	printf("asaksjdhaksjhds\n"); */
       /* } */
-      else if(scm_is_number(ret_val))
+      /* else  */
+      if(scm_is_number(ret_val))
       {
       	double v = scm_to_double(ret_val);
       	outlet_float(x->x_obj.ob_outlet, (t_float)v);
