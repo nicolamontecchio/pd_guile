@@ -42,11 +42,29 @@ struct t_guile_function
   size_t nargs;
 };
 
+/* output errors to pd window instead of stdout */
+SCM scm_handle_by_pdwin_message_noexit(void *handler_data, SCM tag, SCM args)
+{
+  SCM stack, frame, port, s;
+  char *error_msg;
+  stack = scm_make_stack (SCM_BOOL_T, scm_list_1 (scm_from_int (2)));
+  frame = scm_is_true (stack) ? scm_stack_ref (stack, SCM_INUM0) : SCM_BOOL_F;
+  port = scm_open_output_string();
+  scm_print_exception (port, frame, tag, args);
+  s = scm_get_output_string(port);
+  error_msg = scm_to_locale_string(s);
+  post("[guile] GUILE ERROR: %s", error_msg);
+  free(error_msg);
+  scm_close_port(port);
+  return SCM_BOOL_F;
+}
+
 SCM pdguile_catch (void *procedure, void *data)
 {
   SCM value;
   value = scm_internal_catch (SCM_BOOL_T, (scm_t_catch_body)procedure, data,
-			      (scm_t_catch_handler) scm_handle_by_message_noexit, NULL);
+			      (scm_t_catch_handler) scm_handle_by_pdwin_message_noexit, /* was: scm_handle_by_message_noexit */
+			      NULL);
   return value;
 }
 
@@ -120,14 +138,9 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     if(all_good)
     {
       SCM ret_val = pdguile_exec_function(func_name, args, argc);
-      if(ret_val != SCM_UNSPECIFIED)
+      if(ret_val != SCM_UNSPECIFIED && !scm_is_false(ret_val))
       {
-	if(scm_is_false(ret_val))
-	{
-	  // false is returned when an exception is thrown
-	  post("you have some error in your code, check STDOUT\n"); // fix somehow to post to pd win
-	}
-	else if(scm_is_number(ret_val))
+	if(scm_is_number(ret_val))
 	{
 	  double v = scm_to_double(ret_val);
 	  outlet_float(x->x_obj.ob_outlet, (t_float)v);
@@ -168,13 +181,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 
 static void guile_free(t_guile *x)
 {
-  // TODO destructor
-
-  /* x->x_obj
-   */
-
-
-
+  // TODO is this even needed?
 }
 
 
