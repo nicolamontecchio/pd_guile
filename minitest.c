@@ -83,5 +83,7 @@ int main(int argc, char *argv[])
     printf("WTF\n");
   }
 
+  printf("%d\n", (scm_t_bits) SCM_UNSPECIFIED);
+
   return 0;
 }

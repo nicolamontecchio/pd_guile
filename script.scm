@@ -31,7 +31,13 @@
 (define thiscrashes
   (lambda (a b)
     (post "this is a debug message that should appear in the PD window")
-    (+ a b)))
+    (+ a b)
+    (display "asd")
+    sad))
+
+(define cwd
+  (lambda ()
+    (post (getcwd))))
 
 (define any-to-string
   (lambda (s)
