@@ -85,8 +85,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     scm_c_primitive_load(x->guile_src_fullpath);
   else if(strcmp(s->s_name, "float") == 0)
   {
-    printf("input was a float!\n");
-    // TODO complete here
+    // do nothing TODO FIX if statement
   }
   else
   {
@@ -98,7 +97,6 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       post("[guile]: can't load function %s; check your scheme source\n", func_name);
       return;
     }
-    /* SCM func = scm_variable_ref(scm_c_lookup(func_name)); */
 
     SCM * args = malloc(sizeof(SCM) * argc);
     int all_good = 1;
@@ -107,7 +105,6 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       if(argv[i].a_type == A_FLOAT)
       {
 	double d = (double)atom_getfloat(argv + i);
-	/* printf("%f\n", d); */
 	args[i] = scm_from_double(d);
       }
       else if (argv[i].a_type == A_SYMBOL)
@@ -125,11 +122,11 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     {
       SCM ret_val = pdguile_exec_function(func_name, args, argc);
 
-      if(scm_null_p(ret_val))
-      {
-	// do nothing - this avoid ending in the scm_list_p case
-      }
-      else if(scm_is_number(ret_val))
+      /* if(scm_n  (ret_val)) */
+      /* { */
+      /* 	// do nothing - this avoid ending in the scm_list_p case */
+      /* } */
+      /* else */ if(scm_is_number(ret_val))
       {
       	double v = scm_to_double(ret_val);
       	outlet_float(x->x_obj.ob_outlet, (t_float)v);

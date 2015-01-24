@@ -23,12 +23,17 @@
 (define thiscrashes
   (lambda (a b)
     (+ a b)
-    asd
-    (display "asd\n")))
+    ;; asd
+    ;; (display "asd\n")
+    ))
 
 (define any-to-string
   (lambda (s)
     (if (symbol? s) (symbol->string s) s)))
+
+(define outlist
+  (lambda ()
+    '(1 2 3)))
 
 (define catch-thiscrashes
   (lambda ()
