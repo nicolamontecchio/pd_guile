@@ -6,8 +6,8 @@
 #X msg 93 89 23;
 #X msg 166 57 flululu aba bcb;
 #X obj 130 178 guile script.scm;
-#X msg 195 97 thiscrashes 10 20;
 #X msg 92 41 outlist;
+#X msg 182 109 thiscrashes 10 20;
 #X connect 0 0 6 0;
 #X connect 3 0 6 0;
 #X connect 4 0 6 0;
