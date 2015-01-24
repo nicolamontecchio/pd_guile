@@ -110,6 +110,46 @@ SCM pdguile_exec_function (const char *function, SCM *argv, size_t nargs)
 }
 
 
+
+void pdguile_outlet_output(t_guile *x, SCM msg)
+{
+  if(scm_is_number(msg))
+  {
+    double v = scm_to_double(msg);
+    outlet_float(x->x_obj.ob_outlet, (t_float)v);
+  }
+  else if(scm_is_string(msg))
+  {
+    char *s = scm_to_locale_string(msg);
+    outlet_symbol(x->x_obj.ob_outlet, gensym(s));
+  }
+  else if(scm_is_true(scm_list_p(msg)))
+  {
+    int l = scm_to_int(scm_length(msg));
+    t_atom *out_atoms = malloc(l * sizeof(t_atom));
+    for(int i = 0; i < l; i++)
+    {
+      SCM item_i = scm_list_ref(msg, scm_from_int(i));
+      if(scm_is_number(item_i))
+      {
+	double v = scm_to_double(item_i);
+	out_atoms[i].a_type = A_FLOAT;
+	out_atoms[i].a_w.w_float = v;
+      }
+      else if(scm_is_string(item_i))
+      {
+	char *s = scm_to_locale_string(item_i);
+	out_atoms[i].a_type = A_SYMBOL;
+	out_atoms[i].a_w.w_symbol = gensym(s);
+      }
+    }
+    outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
+    free(out_atoms);
+  }
+}
+
+
+
 static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 {
   if(strcmp(s->s_name, "guile-reload") == 0)
@@ -151,39 +191,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     if(all_good)
     {
       SCM ret_val = pdguile_exec_function(func_name, args, argc);
-      if(scm_is_number(ret_val))
-      {
-	double v = scm_to_double(ret_val);
-	outlet_float(x->x_obj.ob_outlet, (t_float)v);
-      }
-      else if(scm_is_string(ret_val))
-      {
-	char *s = scm_to_locale_string(ret_val);
-	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
-      }
-      else if(scm_is_true(scm_list_p(ret_val)))
-      {
-	int l = scm_to_int(scm_length(ret_val));
-	t_atom *out_atoms = malloc(l * sizeof(t_atom));
-	for(int i = 0; i < l; i++)
-	{
-	  SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
-	  if(scm_is_number(item_i))
-	  {
-	    double v = scm_to_double(item_i);
-	    out_atoms[i].a_type = A_FLOAT;
-	    out_atoms[i].a_w.w_float = v;
-	  }
-	  else if(scm_is_string(item_i))
-	  {
-	    char *s = scm_to_locale_string(item_i);
-	    out_atoms[i].a_type = A_SYMBOL;
-	    out_atoms[i].a_w.w_symbol = gensym(s);
-	  }
-	}
-	outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
-	free(out_atoms);
-      }
+      pdguile_outlet_output(x, ret_val);
     }
     free(args);
   }
