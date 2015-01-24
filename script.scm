@@ -16,6 +16,10 @@
     (string-concatenate
      (list a b))))
 
+(define float
+  (lambda (f)
+    f * f))
+
 (define sayhi
   (lambda ()
     (* 10 20)))
@@ -26,10 +30,8 @@
 
 (define thiscrashes
   (lambda (a b)
-    (+ a b)
-    ;; asd
-    ;; (display "asd\n")
-    ))
+    (post "this is a debug message that should appear in the PD window")
+    (+ a b)))
 
 (define any-to-string
   (lambda (s)

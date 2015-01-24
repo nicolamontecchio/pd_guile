@@ -1,4 +1,4 @@
-#N canvas 812 747 450 300 10;
+#N canvas 651 134 450 300 10;
 #X msg 31 148 sayhi;
 #X floatatom 92 220 5 0 0 0 - - -, f 5;
 #X obj 136 253 print;
@@ -12,8 +12,9 @@
 #X floatatom 286 253 5 0 0 0 - - -, f 5;
 #X floatatom 239 252 5 0 0 0 - - -, f 5;
 #X msg 283 82 printsomething;
-#X msg 182 109 thiscrashes 10;
 #X msg 117 83 sdfadf;
+#X msg 258 27 post hi;
+#X msg 182 109 thiscrashes 10 20;
 #X connect 0 0 6 0;
 #X connect 3 0 6 0;
 #X connect 4 0 6 0;
@@ -28,3 +29,4 @@
 #X connect 12 0 6 0;
 #X connect 13 0 6 0;
 #X connect 14 0 6 0;
+#X connect 15 0 6 0;

@@ -12,6 +12,18 @@ typedef struct _guile
   char guile_src_fullpath[2048];
 } t_guile;
 
+
+SCM scm_pdguile_post(SCM msg)
+{
+  if(scm_is_string(msg))
+  {
+    char *s = scm_to_locale_string(msg);
+    post("[guile]: %s", s);
+    free(s);
+  }
+  return SCM_BOOL_F;
+}
+
 static void *guile_new(t_symbol *s, int argc, t_atom *argv)
 {
   if(argc != 1)
@@ -31,6 +43,7 @@ static void *guile_new(t_symbol *s, int argc, t_atom *argv)
     post("[guile]: scheme source file does not exist :(");
     return NULL;
   }
+  scm_c_define_gsubr ("post", 1, 0, 0, scm_pdguile_post);
   scm_c_primitive_load(x->guile_src_fullpath);
   return (x);
 }
@@ -53,7 +66,7 @@ SCM scm_handle_by_pdwin_message_noexit(void *handler_data, SCM tag, SCM args)
   scm_print_exception (port, frame, tag, args);
   s = scm_get_output_string(port);
   error_msg = scm_to_locale_string(s);
-  post("[guile] GUILE ERROR: %s", error_msg);
+  post("[guile] %s", error_msg);
   free(error_msg);
   scm_close_port(port);
   return SCM_BOOL_F;
@@ -103,7 +116,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     scm_c_primitive_load(x->guile_src_fullpath);
   else if(strcmp(s->s_name, "float") == 0)
   {
-    // do nothing TODO FIX if statement
+    post("[guile]: floats are not supported; use a message or a list");
   }
   else
   {
