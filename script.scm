@@ -22,15 +22,9 @@
 
 (define thiscrashes
   (lambda (a b)
-    ;; (display (string-append (number->string (+ a b)) "\n"))
     (+ a b)
-    ;; 3
-    ;; asdlfksjscdhf
-    ))
-
-
-
-
+    asd
+    (display "asd\n")))
 
 (define any-to-string
   (lambda (s)

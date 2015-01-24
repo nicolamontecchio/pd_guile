@@ -65,6 +65,16 @@ int main(int argc, char *argv[])
 
   SCM p = pdguile_guile_exec_function(func_name, args, 2);
 
+  if(scm_null_p(p))
+  {
+    printf("null pointer?\n");
+  }
+
+  if(scm_list_p(p))
+  {
+    printf("list pointer?\n");
+  }
+
   /* printf("%f\n", scm_to_double(p)); */
   free(args);
   return 0;

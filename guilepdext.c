@@ -42,7 +42,7 @@ struct t_guile_function
   size_t nargs;
 };
 
-SCM pdguile_guile_catch (void *procedure, void *data)
+SCM pdguile_catch (void *procedure, void *data)
 {
   SCM value;
   value = scm_internal_catch (SCM_BOOL_T, (scm_t_catch_body)procedure, data,
@@ -50,7 +50,7 @@ SCM pdguile_guile_catch (void *procedure, void *data)
   return value;
 }
 
-SCM pdguile_guile_scm_call_n (void *proc)
+SCM pdguile_scm_call_n (void *proc)
 {
   struct t_guile_function *guile_function;
   guile_function = (struct t_guile_function *)proc;
@@ -58,22 +58,22 @@ SCM pdguile_guile_scm_call_n (void *proc)
 		     guile_function->argv, guile_function->nargs);
 }
 
-SCM pdguile_guile_exec_function (const char *function, SCM *argv, size_t nargs)
+SCM pdguile_exec_function (const char *function, SCM *argv, size_t nargs)
 {
   SCM func, func2, value;
   struct t_guile_function guile_function;
-  func = pdguile_guile_catch (scm_c_lookup, (void *)function);
-  func2 = pdguile_guile_catch (scm_variable_ref, func);
+  func = pdguile_catch (scm_c_lookup, (void *)function);
+  func2 = pdguile_catch (scm_variable_ref, func);
   if (nargs > 0)
   {
     guile_function.proc = func2;
     guile_function.argv = argv;
     guile_function.nargs = nargs;
-    value = pdguile_guile_catch (pdguile_guile_scm_call_n, &guile_function);
+    value = pdguile_catch (pdguile_scm_call_n, &guile_function);
   }
   else
   {
-    value = pdguile_guile_catch (scm_call_0, func2);
+    value = pdguile_catch (scm_call_0, func2);
   }
   return value;
 }
@@ -123,14 +123,13 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     }
     if(all_good)
     {
-      SCM ret_val = pdguile_guile_exec_function(func_name, args, argc);
+      SCM ret_val = pdguile_exec_function(func_name, args, argc);
 
-      /* if(scm_null_p(ret_val)) */
-      /* { */
-      /* 	printf("asaksjdhaksjhds\n"); */
-      /* } */
-      /* else  */
-      if(scm_is_number(ret_val))
+      if(scm_null_p(ret_val))
+      {
+	// do nothing - this avoid ending in the scm_list_p case
+      }
+      else if(scm_is_number(ret_val))
       {
       	double v = scm_to_double(ret_val);
       	outlet_float(x->x_obj.ob_outlet, (t_float)v);
@@ -142,9 +141,7 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       }
       else if(scm_list_p(ret_val))
       {
-      	int l = scm_to_int(scm_length(ret_val));  // TODO CRASHES HERE IF RETVAL IS RESULT OF (display ...)
-	/* printf("scm list of length %d\n", l); */
-
+      	int l = scm_to_int(scm_length(ret_val));
       	t_atom *out_atoms = malloc(l * sizeof(t_atom));
       	for(int i = 0; i < l; i++)
       	{
