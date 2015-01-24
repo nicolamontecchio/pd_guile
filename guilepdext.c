@@ -97,7 +97,6 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
       post("[guile]: can't load function %s; check your scheme source\n", func_name);
       return;
     }
-
     SCM * args = malloc(sizeof(SCM) * argc);
     int all_good = 1;
     for(int i = 0; i < argc; i++)
@@ -121,44 +120,46 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     if(all_good)
     {
       SCM ret_val = pdguile_exec_function(func_name, args, argc);
-
-      if(scm_is_false(ret_val))
+      if(ret_val != SCM_UNSPECIFIED)
       {
-      	// do nothing - this avoid ending in the scm_list_p case
-	post("you have some error in your code, check STDOUT\n");
-      }
-      else if(scm_is_number(ret_val))
-      {
-      	double v = scm_to_double(ret_val);
-      	outlet_float(x->x_obj.ob_outlet, (t_float)v);
-      }
-      else if(scm_is_string(ret_val))
-      {
-      	char *s = scm_to_locale_string(ret_val);
-      	outlet_symbol(x->x_obj.ob_outlet, gensym(s));
-      }
-      else if(scm_list_p(ret_val))
-      {
-      	int l = scm_to_int(scm_length(ret_val));
-      	t_atom *out_atoms = malloc(l * sizeof(t_atom));
-      	for(int i = 0; i < l; i++)
-      	{
-      	  SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
-      	  if(scm_is_number(item_i))
-      	  {
-      	    double v = scm_to_double(item_i);
-      	    out_atoms[i].a_type = A_FLOAT;
-      	    out_atoms[i].a_w.w_float = v;
-      	  }
-      	  else if(scm_is_string(item_i))
-      	  {
-      	    char *s = scm_to_locale_string(item_i);
-      	    out_atoms[i].a_type = A_SYMBOL;
-      	    out_atoms[i].a_w.w_symbol = gensym(s);
-      	  }
-      	}
-	outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
-	free(out_atoms);
+	if(scm_is_false(ret_val))
+	{
+	  // false is returned when an exception is thrown
+	  post("you have some error in your code, check STDOUT\n"); // fix somehow to post to pd win
+	}
+	else if(scm_is_number(ret_val))
+	{
+	  double v = scm_to_double(ret_val);
+	  outlet_float(x->x_obj.ob_outlet, (t_float)v);
+	}
+	else if(scm_is_string(ret_val))
+	{
+	  char *s = scm_to_locale_string(ret_val);
+	  outlet_symbol(x->x_obj.ob_outlet, gensym(s));
+	}
+	else if(scm_list_p(ret_val))
+	{
+	  int l = scm_to_int(scm_length(ret_val));
+	  t_atom *out_atoms = malloc(l * sizeof(t_atom));
+	  for(int i = 0; i < l; i++)
+	  {
+	    SCM item_i = scm_list_ref(ret_val, scm_from_int(i));
+	    if(scm_is_number(item_i))
+	    {
+	      double v = scm_to_double(item_i);
+	      out_atoms[i].a_type = A_FLOAT;
+	      out_atoms[i].a_w.w_float = v;
+	    }
+	    else if(scm_is_string(item_i))
+	    {
+	      char *s = scm_to_locale_string(item_i);
+	      out_atoms[i].a_type = A_SYMBOL;
+	      out_atoms[i].a_w.w_symbol = gensym(s);
+	    }
+	  }
+	  outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
+	  free(out_atoms);
+	}
       }
     }
     free(args);
@@ -179,7 +180,6 @@ static void guile_free(t_guile *x)
 
 void guile_setup(void)
 {
-
   guile_class = class_new(gensym("guile"), (t_newmethod)guile_new,
 			  (t_method)guile_free, sizeof(t_guile), 0, A_GIMME, 0);
   class_addanything(guile_class, (t_method)guile_anything);

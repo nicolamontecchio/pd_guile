@@ -54,28 +54,34 @@ SCM pdguile_guile_exec_function (const char *function, SCM *argv, size_t nargs)
 int main(int argc, char *argv[])
 {
   scm_init_guile();
-  scm_c_primitive_load("script.scm");
-  SCM cm = scm_current_module ();
+  /* scm_c_primitive_load("script.scm"); */
+  /* SCM cm = scm_current_module (); */
 
-  char *func_name = "thiscrashes";
+  /* char *func_name = "thiscrashes"; */
 
-  SCM *args = malloc(sizeof(SCM) * 2);
-  args[0] = scm_from_double(20);
-  args[1] = scm_from_double(10);
+  /* SCM *args = malloc(sizeof(SCM) * 2); */
+  /* args[0] = scm_from_double(20); */
+  /* args[1] = scm_from_double(10); */
 
-  SCM p = pdguile_guile_exec_function(func_name, args, 2);
+  /* SCM p = pdguile_guile_exec_function(func_name, args, 2); */
 
-  if(scm_null_p(p))
+  /* if(scm_null_p(p)) */
+  /* { */
+  /*   printf("null pointer?\n"); */
+  /* } */
+
+  /* if(scm_list_p(p)) */
+  /* { */
+  /*   printf("list pointer?\n"); */
+  /* } */
+
+  /* /\* printf("%f\n", scm_to_double(p)); *\/ */
+  /* free(args); */
+
+  if(scm_list_p(SCM_UNSPECIFIED))
   {
-    printf("null pointer?\n");
+    printf("WTF\n");
   }
 
-  if(scm_list_p(p))
-  {
-    printf("list pointer?\n");
-  }
-
-  /* printf("%f\n", scm_to_double(p)); */
-  free(args);
   return 0;
 }

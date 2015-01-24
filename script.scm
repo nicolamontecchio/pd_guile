@@ -20,6 +20,10 @@
   (lambda ()
     (* 10 20)))
 
+(define printsomething
+  (lambda ()
+    (display "hello")))
+
 (define thiscrashes
   (lambda (a b)
     (+ a b)
