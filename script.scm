@@ -47,15 +47,17 @@
   (lambda ()
     '(1 2 3)))
 
+(define badoutput
+  (lambda ()
+    '('(1 2 3) '(3 5))))
+
+
 (define catch-thiscrashes
   (lambda ()
     (catch #t
       (lambda () (thiscrashes 3 4))
       (lambda (key . parameters)
-	(display (string-append "ERROR: " (symbol->string key) "\n"))
-	;; (display (string-append
-	;; 	  (string-concatenate (map any-to-string parameters))
-	;; 	  "\n"))
-	))))
+	(display
+	 (string-append "ERROR: " (symbol->string key) "\n"))))))
 
 ;; (catch-thiscrashes)

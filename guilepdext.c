@@ -75,8 +75,9 @@ SCM scm_handle_by_pdwin_message_noexit(void *handler_data, SCM tag, SCM args)
 SCM pdguile_catch (void *procedure, void *data)
 {
   SCM value;
-  value = scm_internal_catch (SCM_BOOL_T, (scm_t_catch_body)procedure, data,
-			      (scm_t_catch_handler) scm_handle_by_pdwin_message_noexit, /* was: scm_handle_by_message_noexit */
+  value = scm_internal_catch (SCM_BOOL_T,
+			      (scm_t_catch_body)procedure, data,
+			      (scm_t_catch_handler) scm_handle_by_pdwin_message_noexit,
 			      NULL);
   return value;
 }
@@ -85,12 +86,55 @@ SCM pdguile_scm_call_n (void *proc)
 {
   struct t_guile_function *guile_function;
   guile_function = (struct t_guile_function *)proc;
-  return scm_call_n (guile_function->proc,
-		     guile_function->argv, guile_function->nargs);
+  return scm_call_n (guile_function->proc, guile_function->argv, guile_function->nargs);
 }
 
-SCM pdguile_exec_function (const char *function, SCM *argv, size_t nargs)
+void pdguile_outlet_output(t_guile *x, SCM msg)
 {
+  if(scm_is_number(msg))
+  {
+    double v = scm_to_double(msg);
+    outlet_float(x->x_obj.ob_outlet, (t_float)v);
+  }
+  else if(scm_is_string(msg))
+  {
+    char *s = scm_to_locale_string(msg);
+    outlet_symbol(x->x_obj.ob_outlet, gensym(s));
+  }
+  else if(scm_is_true(scm_list_p(msg)))
+  {
+    int l = scm_to_int(scm_length(msg));
+    t_atom *out_atoms = malloc(l * sizeof(t_atom));
+    int all_output_good = 1;
+    for(int i = 0; i < l; i++)
+    {
+      SCM item_i = scm_list_ref(msg, scm_from_int(i));
+      if(scm_is_number(item_i))
+      {
+	double v = scm_to_double(item_i);
+	out_atoms[i].a_type = A_FLOAT;
+	out_atoms[i].a_w.w_float = v;
+      }
+      else if(scm_is_string(item_i))
+      {
+	char *s = scm_to_locale_string(item_i);
+	out_atoms[i].a_type = A_SYMBOL;
+	out_atoms[i].a_w.w_symbol = gensym(s);
+      }
+      else
+	all_output_good = 0;
+    }
+    if(all_output_good)
+      outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
+    else
+      post("[guile]: invalid output to the outlet");
+    free(out_atoms);
+  }
+}
+
+SCM pdguile_exec_function (t_guile *x, const char *function, SCM *argv, size_t nargs)
+{
+  printf("EXECUTING %s\n", function);
   SCM func, func2, value;
   struct t_guile_function guile_function;
   func = pdguile_catch (scm_c_lookup, (void *)function);
@@ -109,47 +153,6 @@ SCM pdguile_exec_function (const char *function, SCM *argv, size_t nargs)
   return value;
 }
 
-
-
-void pdguile_outlet_output(t_guile *x, SCM msg)
-{
-  if(scm_is_number(msg))
-  {
-    double v = scm_to_double(msg);
-    outlet_float(x->x_obj.ob_outlet, (t_float)v);
-  }
-  else if(scm_is_string(msg))
-  {
-    char *s = scm_to_locale_string(msg);
-    outlet_symbol(x->x_obj.ob_outlet, gensym(s));
-  }
-  else if(scm_is_true(scm_list_p(msg)))
-  {
-    int l = scm_to_int(scm_length(msg));
-    t_atom *out_atoms = malloc(l * sizeof(t_atom));
-    for(int i = 0; i < l; i++)
-    {
-      SCM item_i = scm_list_ref(msg, scm_from_int(i));
-      if(scm_is_number(item_i))
-      {
-	double v = scm_to_double(item_i);
-	out_atoms[i].a_type = A_FLOAT;
-	out_atoms[i].a_w.w_float = v;
-      }
-      else if(scm_is_string(item_i))
-      {
-	char *s = scm_to_locale_string(item_i);
-	out_atoms[i].a_type = A_SYMBOL;
-	out_atoms[i].a_w.w_symbol = gensym(s);
-      }
-    }
-    outlet_list(x->x_obj.ob_outlet, gensym("list"), l, out_atoms);
-    free(out_atoms);
-  }
-}
-
-
-
 static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
 {
   if(strcmp(s->s_name, "guile-reload") == 0)
@@ -161,13 +164,6 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
   else
   {
     char *func_name = s->s_name;
-    SCM cm = scm_current_module();
-    SCM f = scm_module_variable(cm, scm_from_utf8_symbol(func_name));
-    if(scm_is_false(f))
-    {
-      post("[guile]: can't load function %s; check your scheme source\n", func_name);
-      return;
-    }
     SCM * args = malloc(sizeof(SCM) * argc);
     int all_good = 1;
     for(int i = 0; i < argc; i++)
@@ -190,17 +186,14 @@ static void guile_anything(t_guile *x, t_symbol *s, int argc, t_atom *argv)
     }
     if(all_good)
     {
-      SCM ret_val = pdguile_exec_function(func_name, args, argc);
+      SCM ret_val = pdguile_exec_function(x, func_name, args, argc);
       pdguile_outlet_output(x, ret_val);
     }
     free(args);
   }
 }
 
-static void guile_free(t_guile *x)
-{
-  // TODO is this even needed?
-}
+static void guile_free(t_guile *x) { }  // is this even needed?
 
 
 void guile_setup(void)
